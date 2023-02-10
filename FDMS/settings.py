@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework.authtoken',
     'app',
     'corsheaders',
 ]
@@ -54,7 +55,12 @@ MIDDLEWARE = [
 ]
 
 Rest_Framework = {'DEFAULT_PERMISSION_CLASSES': [
-    'rest_framework.permission.AllowAny']}
+    'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES':[
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication'
+    ] }
 
 CORS_ORIGIN_ALLOW_ALL = True
 
