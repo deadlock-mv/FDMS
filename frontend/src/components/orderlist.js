@@ -4,15 +4,36 @@ import { useLocation } from "react-router-dom";
 
 function OrderList(props) {
     const location = useLocation();
-    console.log(location, "gotcha");
-    const data = location.state?.data;
-    console.log(data, "the data I need");
+    console.log(location);
+    let data = location.state?.data;
+    console.log(data);
+    const customerid = Number(localStorage.getItem('userid'));
 
     let total = 0;
 
     for (let key in data) {
         total += data[key][2];
     }
+
+    let order = {
+        customerid: customerid,
+        total: total,
+    }
+    console.log(order);
+
+    let orderlist = [];
+    for(let key in data) {
+        orderlist.push({
+            itemid: key,
+            quantity:data[key][1],
+            orderid:'',
+        });
+    };
+    console.log(orderlist);
+   
+
+
+    
 
     return (
         <div className="container mt-4 ">
@@ -48,7 +69,7 @@ function OrderList(props) {
                 </div>
                 <div className="card-footer text-muted">
                     <p>Grand Total: {total} </p>
-                    <Link to="/payment_method" className="btn btn-primary">Payment</Link>
+                    <Link to="/payment_method" state={{data:order, list:orderlist}} className="btn btn-primary">Payment</Link>
                 </div>
             </div>
         </div>

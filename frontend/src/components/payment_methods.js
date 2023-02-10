@@ -1,4 +1,13 @@
+import { useLocation } from "react-router-dom";
+
 export default function Payment() {
+    const location = useLocation();
+    const data = location.state?.data;
+    const list = location.state?.list;
+    console.log(data);
+    console.log(list);
+    
+
 
     return (
         <div className="card container mx-auto mt-4">

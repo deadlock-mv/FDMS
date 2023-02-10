@@ -8,9 +8,9 @@ import axios from "axios";
 function Cuisines() {
     // let id = { useParams };
     const [data, setData] = useState({});
-    const [total, setTotal] = useState(10);
+    const [total, setTotal] = useState();
     const [cuisine, setCuisine] = useState([]);
-    
+    const loginstatus = localStorage.getItem('loginstatus');
     // using for getting data from api 
     useEffect(() => {
         getCuisine()
@@ -22,6 +22,11 @@ function Cuisines() {
     
         for (let key in data) {
             amt += data[key][2];
+            if (data[key][2]==0){
+                let deldata = data;
+                delete deldata[key];
+                setData(deldata);
+            }
         }
     
         setTotal(amt);
@@ -68,7 +73,8 @@ function Cuisines() {
         top: 80,
         left: 0,
         paddingtop: "40px",
-        backgroundcolor: "lightblue"
+        backgroundcolor: "lightblue",
+        margin: "20px"
     };
     return (
 
@@ -76,8 +82,8 @@ function Cuisines() {
             <div className="row">
 
                 {/* sidebar def */}
-                <div style={sidebar}>
-                    <aside className="col-md-3">
+                <div style={sidebar} >
+                    <aside className="col-md-4 col-sm-3">
                         <div className="card">
                             <h5 className="card-header">Menu</h5>
                             <div id="list-example" className="list-group list-group-flush">
@@ -94,8 +100,8 @@ function Cuisines() {
                 {/* sidebar def end */}
 
                 {/* main body items  */}
-                <section className="col-md-5">
-                    <div className="card" >
+                <section className="col-md-8 col-sm-6 ms-4 p-5">
+                    <div className="card p-5" >
                         <div data-spy="scroll" data-target="#list-example" data-offset="0" className="scrollspy-example">
                             
                             {/* populating order list table */}
@@ -141,11 +147,18 @@ function Cuisines() {
                         <div className="card-header">
                             <h5>Total Amount</h5>
                         </div>
+                        {loginstatus=='true' &&
                         <div className="card-body">
                             <h5 className="card-title">{total}</h5>
-
                             <Link to="/order_review" state={{data: data}} className="btn btn-primary">Place Order</Link>
                         </div>
+                        }
+                        {loginstatus!='true' &&
+                        <div className="card-body">
+                            <h5 className="card-title">{total}</h5>
+                            <Link to="/login"  className="btn btn-primary">Login to Order</Link>
+                        </div>
+                        }
                     </div>
                 </div>
             </div>
