@@ -6,7 +6,9 @@ from .serializers import *
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
 from rest_framework import generics, viewsets
-from django.http import Http404
+from django.http import Http404, JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.permissions import IsAdminUser
 
 # Create your views here.
 
@@ -20,8 +22,10 @@ from django.http import Http404
     # return Response(serializer.data) 
 
 
-
+# admin list with getting userlist, adding/posting, putting, deleting a user
+# requires admin authentication 
 class UserList(APIView):
+    # permission_classes = [IsAdminUser]
     def post(self, request):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
@@ -42,6 +46,23 @@ class UserList(APIView):
             serializer = UserSerializer(users, many=True)  
         return Response(serializer.data) 
 
+    def put(self,request,pk=None):
+        users = Users.objects.get(pk=pk)
+        serializer = UserSerializer(users, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+    def delete(self,request,pk=None):
+        users = Users.objects.get(pk=pk)
+        users.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT) 
+
+
+# particular user related functionality like get, put, delete for now -feb 9, need to add post functionality for ordering
 class UserDetail(APIView):
     def get(self,request,pk=None):
         try:
@@ -60,33 +81,29 @@ class UserDetail(APIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-# order generation function, still working on it 
-    def post(self, request,pk=None):
-        user = User.objects.get(pk=pk)
-        serializer = FoodorderSerializer(data=request.data)
-        if serializers.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+    @csrf_exempt
+    def login(request):
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        # try:
+        #     user = Users.objects.get(username=username, password=password)
+        # except Users.DoesNotExist:
+        #     return Response(status=status.HTTP_404_NOT_FOUND)
+        # serializer = UserSerializer(user)
+        # return Response(serializer.data, status=status.HTTP_200_OK)
+        try:
+            user = Users.objects.get(username=username, password=password)
+        except ObjectDoesNotExist:
+            user=None
+        if user:
+            return JsonResponse({'bool':True, 'userid': user.userid})
         else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    
+            return JsonResponse({'bool':False})
             
     def delete(self,request,pk=None):
         users = Users.objects.get(pk=pk)
         users.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    
-    def login(request):
-        username = request.POST['username']
-        password = request.POST['password']
-        try:
-            user = Users.objects.get(username=username, password=password)
-        except Users.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        serializer = UserSerializer(user)
-        return Response(serializer.data)
+        return Response(status=status.HTTP_204_NO_CONTENT) 
 
 
 class CategoryList(APIView):
@@ -128,6 +145,7 @@ class CategoryDetail(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 class OrderList(APIView):
+# order list with order items 
     def get(self,request,pk=None):
         if pk:
             try: 
@@ -140,20 +158,44 @@ class OrderList(APIView):
             serializer = FoodorderSerializer(orderlist, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+# order id generation 
     def post(self, request):
-        serializer = FoodorderpostSerializer(data=request.data)
+        serializer = FoodorderSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
-class OrdList(generics.ListCreateAPIView):
-    queryset = Foodorder.objects.all()
-    serializer_class = FoodorderpostSerializer
+class OrdItems(APIView):
+    def get(self, request):
+        orditems = Orderitem.objects.all()
+        serializer = OrderitemSerializer(orditems, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+        
+    
+    def post(self,request):
+        serializer = OrderitemSerializer(data=request.data, many=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+    
+    # queryset = Orderitem.objects.all()
+    # serializer_class = FoodorderpostSerializer
     
 
+class OrdPost(APIView):
+    def post(self,request):
+        serializer = FoodorderSerializer(data = request.data)
+        if serializer.is_valid():
+            serializer.save()
+        orderid = serializer.data.id
 
+        serializer = request.list
+        for key in serializer:
+            serializer = OrderitemSerializer(serializer)
 
 # if pk:
 #             try:

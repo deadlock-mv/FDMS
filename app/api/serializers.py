@@ -29,19 +29,19 @@ class FoodorderSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class FoodorderpostSerializer(serializers.ModelSerializer):
-    orderitem = OrderitemSerializer(many=True)
-    class Meta:
-        model = Foodorder
-        fields = ('customerid', 'orderstatusid', 'delagentid', 'totalamount','orderitem')
+# class FoodorderpostSerializer(serializers.ModelSerializer):
+#     orderitem = OrderitemSerializer(many=True)
+#     class Meta:
+#         model = Orderitem
+#         fields = ('customerid', 'orderstatusid', 'delagentid', 'totalamount','orderitem')
 
-    def create(self, validated_data):
-        orderitem = validated_data.pop('orderitem')
-        print(**validated_data)
-        foodOrder = Foodorder.objects.create(**validated_data)
-        for order in orderitem:
-            Orderitem.object.create(orderid=foodOrder, **order)
-        return foodOrder
+#     def create(self, validated_data):
+#         orderitem = validated_data.pop('orderitem')
+#         print(**validated_data)
+#         foodOrder = Foodorder.objects.create(**validated_data)
+#         for order in orderitem:
+#             Orderitem.object.create(orderid=foodOrder, **order)
+#         return foodOrder
         
    
 
@@ -70,4 +70,10 @@ class UserSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Name must be at least 4 characters long")
         else:
             return value
+
+
+# class AuthUserSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = AuthUser
+#         fields = ['username','password']
 

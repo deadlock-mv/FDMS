@@ -84,7 +84,6 @@ class Orderitem(models.Model):
     orderid = models.ForeignKey(Foodorder, on_delete=models.CASCADE, db_column='OrderID', related_name="orderitem")  # Field name made lowercase.
     itemid = models.ForeignKey(Itemlist, models.DO_NOTHING, db_column='ItemID')  # Field name made lowercase.
     quantity = models.IntegerField(db_column='Quantity')  # Field name made lowercase.
-    netvalue = models.IntegerField(db_column='NetValue')  # Field name made lowercase.
 
 
     class Meta:
